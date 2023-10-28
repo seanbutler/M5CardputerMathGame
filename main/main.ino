@@ -22,7 +22,7 @@ enum AppState : int {
 AppState global_app_state = INTRO_SCREEN;
 AppState global_prev_state = NONE;
 
-int row_height = 32;
+static constexpr int row_height = 32;
 
 int a, b, c;
 String question = "";
@@ -30,14 +30,65 @@ String answer = "";
 String goal = "";
 String tally = "";
 
-const int round_length = 5;
+String top_message = "";
+
+static constexpr int round_length = 10;
 int round_count;
 int round_score;
 
-static constexpr int FOREGROUND_COLOUR = GREEN;
+static constexpr int FOREGROUND_COLOUR = RED;
 static constexpr int BACKGROUND_COLOUR = BLACK; 
 
+void clear_screen() {
+
+  M5Cardputer.Display.fillRect(0, 0,
+        M5Cardputer.Display.width(), 
+        M5Cardputer.Display.height(),
+        BACKGROUND_COLOUR);
+
+}
+
+void large_middle_message(String message) {
+
+  M5Cardputer.Display.setTextDatum(middle_center);
+  M5Cardputer.Display.setTextFont(&fonts::FreeSans18pt7b);
+  M5Cardputer.Display.setTextSize(1);
+
+  M5Cardputer.Display.drawString(message,
+                              M5Cardputer.Display.width() / 2,
+                              M5Cardputer.Display.height() / 2);
+}
+
+void small_bottom_message(String message) {
+
+  M5Cardputer.Display.setTextDatum(bottom_center);
+
+  M5Cardputer.Display.setTextFont(&fonts::FreeSans9pt7b);
+  M5Cardputer.Display.setTextSize(1);
+
+  M5Cardputer.Display.drawString(message,
+                                  M5Cardputer.Display.width() / 2,
+                                  M5Cardputer.Display.height() - 3 );
+}
+
+void small_top_message(String message) {
+
+  M5Cardputer.Display.setTextDatum(top_center);
+
+  M5Cardputer.Display.setTextFont(&fonts::FreeSans9pt7b);
+  M5Cardputer.Display.setTextSize(1);
+
+  M5Cardputer.Display.drawString(message,
+                                M5Cardputer.Display.width() / 2,
+                                3 );
+}
+
+
+
 void setup() {
+
+  randomSeed(analogRead(0));
+
 
   auto cfg = M5.config();
   M5Cardputer.begin(cfg);
@@ -61,11 +112,7 @@ void loop() {
         if ( global_prev_state != global_app_state ) {
           global_prev_state = global_app_state;
 
-          M5Cardputer.Display.fillRect(0, 0,
-                                    M5Cardputer.Display.width(), 
-                                    M5Cardputer.Display.height(),
-                                    BACKGROUND_COLOUR);
-
+          clear_screen();
 
           M5Cardputer.Display.setTextDatum(middle_center);
           M5Cardputer.Display.setTextFont(&fonts::FreeSans18pt7b);
@@ -79,18 +126,15 @@ void loop() {
                                         M5Cardputer.Display.width() / 2,
                                         row_height * 2);
 
-          M5Cardputer.Display.setTextFont(&fonts::FreeSans9pt7b);
-          M5Cardputer.Display.setTextSize(1);
 
-          M5Cardputer.Display.drawString("Press a key to start",
-                                        M5Cardputer.Display.width() / 2,
-                                        M5Cardputer.Display.height() - 16 );
+          small_bottom_message("Press Any Key");
 
           M5Cardputer.Display.setTextFont(&fonts::FreeSans18pt7b);
           M5Cardputer.Display.setTextSize(1);
 
           round_count = 0;
           round_score = 0;
+          
 
           return;   
         }
@@ -110,8 +154,8 @@ void loop() {
 
           round_count = round_count + 1;
 
-          a = random(13);
-          b = random(13);
+          a = random(1, 13);
+          b = random(1, 13);
           goal = a * b;
           
           question = a;
@@ -119,15 +163,17 @@ void loop() {
           question += b;
           question += " = ";
   
-          M5Cardputer.Display.fillRect(0, 0,
-                                  M5Cardputer.Display.width(), 
-                                  M5Cardputer.Display.height(),
-                                  BACKGROUND_COLOUR);
+          clear_screen();
 
+          String top_message = "Question ";
+          top_message += round_count;
+          top_message += " out of ";
+          top_message += round_length;
+
+          small_top_message(top_message);
 
           M5Cardputer.Display.setTextFont(&fonts::FreeSans18pt7b);
           M5Cardputer.Display.setTextSize(1);
-
 
           M5Cardputer.Display.setTextDatum(middle_left);
           M5Cardputer.Display.drawString(question,
@@ -162,11 +208,6 @@ void loop() {
 
             if (status.enter) {
 
-              M5Cardputer.Display.fillRect(0, 0,
-                                          M5Cardputer.Display.width(), 
-                                          M5Cardputer.Display.height(),
-                                          BACKGROUND_COLOUR);
-  
               global_app_state = CHECK_ANSWER;
               return;
             }
@@ -188,36 +229,25 @@ void loop() {
         if ( global_prev_state != global_app_state ) {
           global_prev_state = global_app_state;
           
-          M5Cardputer.Display.fillRect(0, 0,
-                                    M5Cardputer.Display.width(), 
-                                    M5Cardputer.Display.height(),
-                                    BACKGROUND_COLOUR);
-
+          clear_screen();
 
           M5Cardputer.Display.setTextDatum(middle_center);
           M5Cardputer.Display.setTextFont(&fonts::FreeSans18pt7b);
           M5Cardputer.Display.setTextSize(1);
-
+          String response;
+          
           if ( answer.equalsIgnoreCase(goal)){
             round_score += 1;
 
-            M5Cardputer.Display.drawString("Correct!",
-                                          M5Cardputer.Display.width() / 2,
-                                          M5Cardputer.Display.height() /2 );
+            response = "Yes, Correct!";
           }
           else
           {
-            M5Cardputer.Display.drawString("Wrong!",
-                                          M5Cardputer.Display.width() / 2,
-                                          M5Cardputer.Display.height() /2 );
+            response = "Sorry, No.";
           }
-          
-          M5Cardputer.Display.setTextFont(&fonts::FreeSans9pt7b);
-          M5Cardputer.Display.setTextSize(1);
 
-          M5Cardputer.Display.drawString("Press a key to contiune",
-                                        M5Cardputer.Display.width() / 2,
-                                        M5Cardputer.Display.height() - 16 );
+          large_middle_message(response);          
+          small_bottom_message("Press a Key to Continue");
         }
 
         if (M5Cardputer.Keyboard.isChange()) {
@@ -230,10 +260,6 @@ void loop() {
               global_app_state = PRESENT_QUESTION;
             }
 
-            M5Cardputer.Display.fillRect(0, 0,
-                                      M5Cardputer.Display.width(), 
-                                      M5Cardputer.Display.height(),
-                                      BACKGROUND_COLOUR);
             return;
           }
         }
@@ -243,10 +269,7 @@ void loop() {
         if ( global_prev_state != global_app_state ) {
           global_prev_state = global_app_state;
         
-          M5Cardputer.Display.fillRect(0, 0,
-                                    M5Cardputer.Display.width(), 
-                                    M5Cardputer.Display.height(),
-                                    BACKGROUND_COLOUR);
+          clear_screen();
 
 
           M5Cardputer.Display.setTextDatum(middle_center);
@@ -272,12 +295,7 @@ void loop() {
                                           M5Cardputer.Display.width() / 2,
                                           M5Cardputer.Display.height() / 2 );
 
-          M5Cardputer.Display.setTextFont(&fonts::FreeSans9pt7b);
-          M5Cardputer.Display.setTextSize(1);
-
-          M5Cardputer.Display.drawString("Press a key to go again",
-                                          M5Cardputer.Display.width() / 2,
-                                          M5Cardputer.Display.height() - 16 );
+          small_bottom_message("Again? Press Any Key");
 
           M5Cardputer.Display.setTextFont(&fonts::FreeSans18pt7b);
           M5Cardputer.Display.setTextSize(1);
@@ -285,8 +303,6 @@ void loop() {
 
         if (M5Cardputer.Keyboard.isChange()) {
           if ( M5Cardputer.Keyboard.isPressed()) {
-
-
             global_app_state = INTRO_SCREEN;
             return;
           }
