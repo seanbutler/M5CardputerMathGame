@@ -1,4 +1,4 @@
-# M5CardputerMathGame
+# M5 Cardputer Math Game
 
 A maths game written for the new M5 Cardputer.
 
