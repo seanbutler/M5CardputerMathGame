@@ -1,9 +1,9 @@
-# M5CardputerMathGame
+# M5 Cardputer Math Game
 
 A maths game written for the new [M5 Cardputer](https://docs.m5stack.com/en/core/Cardputer
 ).
 
-Currently asks random times tables questions in sets of 10, if you get more than 9 right there are some sparkles.
+This version asks you multiplication questions suitable for a middle schooler in groups of 10 then tells you the score!
 
 ![](IMG_0259-r270-1024x1024.jpg)
 ![](IMG_0258-r270-1024x1024.jpg)
