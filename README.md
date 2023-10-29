@@ -1,7 +1,12 @@
 # M5CardputerMathGame
 
-A maths game written for the new M5 Cardputer.
+A maths game written for the new [M5 Cardputer](https://docs.m5stack.com/en/core/Cardputer
+).
 
-![](https://static-cdn.m5stack.com/resource/docs/products/core/Cardputer/img-60261bcd-a23f-40e6-994d-ad97477dcec4.webp)
+Currently asks random times tables questions in sets of 10, if you get more than 9 right there are some sparkles.
 
-https://docs.m5stack.com/en/core/Cardputer
+![](IMG_0259-r270-1024x1024.jpg)
+![](IMG_0258-r270-1024x1024.jpg)
+![](IMG_0257-r270-1024x1024.jpg)
+
+I like this approach because I can give it to my offsprint, the games are focussed on her needs, also there is no internet or other similar distractions.

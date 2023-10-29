@@ -16,7 +16,8 @@ enum AppState : int {
   PRESENT_QUESTION, 
   INPUT_ANSWER, 
   CHECK_ANSWER,
-  TALLY_SCREEN
+  TALLY_SCREEN,
+  CELEBRATE_STATE
 };
 
 AppState global_app_state = INTRO_SCREEN;
@@ -38,6 +39,16 @@ int round_score;
 
 static constexpr int FOREGROUND_COLOUR = RED;
 static constexpr int BACKGROUND_COLOUR = BLACK; 
+
+static constexpr int NUM_PARTICLES = 64;
+struct particle {
+  float x, y;
+  float dx, dy; 
+  uint16_t c;
+};
+
+particle particle_system[NUM_PARTICLES];
+
 
 void clear_screen() {
 
@@ -143,11 +154,12 @@ void loop() {
           if ( M5Cardputer.Keyboard.isPressed()) {
 
             global_app_state = PRESENT_QUESTION;
+            
             return;
           }
         }
       break;
-
+  
       case PRESENT_QUESTION:
         if ( global_prev_state != global_app_state ) {
           global_prev_state = global_app_state;
@@ -303,11 +315,69 @@ void loop() {
 
         if (M5Cardputer.Keyboard.isChange()) {
           if ( M5Cardputer.Keyboard.isPressed()) {
-            global_app_state = INTRO_SCREEN;
+            if ( round_score >= ( round_length - 1))
+              global_app_state = CELEBRATE_STATE;
+            else
+              global_app_state = INTRO_SCREEN;
+
             return;
           }
         }
       break;
 
+
+      case CELEBRATE_STATE:
+        if ( global_prev_state != global_app_state ) {
+          global_prev_state = global_app_state;
+        
+          // clear_screen();
+
+          for (int n=0;n<NUM_PARTICLES;n++){
+            particle_system[n].x = M5Cardputer.Display.width() / 2;
+            particle_system[n].y = M5Cardputer.Display.height() / 2;
+
+            float d1 = random(0, 10);
+            float d2 = random(0, 100);
+            float d3 = d1 + ( d2 / 100.0);
+
+            particle_system[n].dx = 5 - d3;
+
+            d1 = random(0, 4);
+            d2 = random(0, 100);
+            d3 = d1 + ( d2 / 100.0);
+
+            particle_system[n].dy = -d3;
+            particle_system[n].c = rand();
+          }
+        }
+
+        clear_screen();
+        
+        for (int n=0;n<NUM_PARTICLES;n++){
+
+          particle_system[n].dx *= 0.96;
+          particle_system[n].x += particle_system[n].dx;
+
+          particle_system[n].dy += 0.05;
+          particle_system[n].y += particle_system[n].dy;
+        }
+
+        for (int n=0;n<NUM_PARTICLES;n++){
+          M5Cardputer.Display.fillCircle(
+                    particle_system[n].x, particle_system[n].y, 
+                    4, 
+                    particle_system[n].c);
+        }
+
+        small_bottom_message("Press Any Key");
+        delay(6);
+
+        if (M5Cardputer.Keyboard.isChange()) {
+          if ( M5Cardputer.Keyboard.isPressed()) {
+            global_app_state = INTRO_SCREEN;
+            return;
+          }
+        }
+      break;
     }
 }
