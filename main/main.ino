@@ -9,11 +9,15 @@
 
 #include "M5Cardputer.h"
 
+
 enum AppState : int {
 
   NONE,
   INTRO_SCREEN,
-  PRESENT_QUESTION, 
+  QUIZ_MENU_SCREEN,
+  DECIDE_QUESTION,
+  PRESENT_MULTIPLICATION_QUESTION,
+  PRESENT_DIVISION_QUESTION,
   INPUT_ANSWER, 
   CHECK_ANSWER,
   TALLY_SCREEN,
@@ -25,9 +29,12 @@ AppState global_prev_state = NONE;
 
 static constexpr int row_height = 32;
 
+int quiz_type;
+
 int a, b, c;
 String question = "";
 String answer = "";
+String choice = "";
 String goal = "";
 String tally = "";
 
@@ -94,12 +101,9 @@ void small_top_message(String message) {
                                 3 );
 }
 
-
-
 void setup() {
 
   randomSeed(analogRead(0));
-
 
   auto cfg = M5.config();
   M5Cardputer.begin(cfg);
@@ -112,6 +116,8 @@ void setup() {
 
   round_count = 0;
   round_score = 0;
+
+  quiz_type = 1;
 }
 
 void loop() {
@@ -129,14 +135,13 @@ void loop() {
           M5Cardputer.Display.setTextFont(&fonts::FreeSans18pt7b);
           M5Cardputer.Display.setTextSize(1);
 
-          M5Cardputer.Display.drawString("Meadow's",
+          M5Cardputer.Display.drawString("Awesome",
                                         M5Cardputer.Display.width() / 2,
                                         row_height * 1);
 
           M5Cardputer.Display.drawString("Maths Game",
                                         M5Cardputer.Display.width() / 2,
                                         row_height * 2);
-
 
           small_bottom_message("Press Any Key");
 
@@ -146,21 +151,116 @@ void loop() {
           round_count = 0;
           round_score = 0;
           
-
           return;   
         }
 
         if (M5Cardputer.Keyboard.isChange()) {
           if ( M5Cardputer.Keyboard.isPressed()) {
 
-            global_app_state = PRESENT_QUESTION;
+            // global_app_state = DECIDE_QUESTION;
+            global_app_state = QUIZ_MENU_SCREEN;
             
             return;
           }
         }
       break;
-  
-      case PRESENT_QUESTION:
+
+
+
+      case QUIZ_MENU_SCREEN:
+        if ( global_prev_state != global_app_state ) {
+          global_prev_state = global_app_state;
+
+          clear_screen();
+
+          M5Cardputer.Display.setTextDatum(middle_center);
+          M5Cardputer.Display.setTextFont(&fonts::FreeSans18pt7b);
+          M5Cardputer.Display.setTextSize(1);
+
+          M5Cardputer.Display.drawString("Please Choose",
+                                        M5Cardputer.Display.width() / 2,
+                                        row_height * 1);
+
+
+          M5Cardputer.Display.setTextDatum(middle_center);
+          M5Cardputer.Display.setTextFont(&fonts::FreeSans9pt7b);
+          M5Cardputer.Display.setTextSize(1);
+
+          M5Cardputer.Display.drawString("Press M for Multiplication",
+                                        M5Cardputer.Display.width() / 2,
+                                        (row_height * 2) + ( 0.5 * row_height * 1) );
+
+          M5Cardputer.Display.drawString("Press D for Division",
+                                        M5Cardputer.Display.width() / 2,
+                                        (row_height * 2) + ( 0.5 * row_height * 2) );
+
+          M5Cardputer.Display.drawString("Press R for Random",
+                                        M5Cardputer.Display.width() / 2,
+                                        (row_height * 2) + ( 0.5 * row_height * 3) );
+         
+          return;   
+        }
+
+        if (M5Cardputer.Keyboard.isChange()) 
+        {
+          if (M5Cardputer.Keyboard.isPressed()) 
+          {
+            if ( ( M5Cardputer.Keyboard.isKeyPressed('M') )
+              || ( M5Cardputer.Keyboard.isKeyPressed('m') ) )
+            {
+              quiz_type = 0;
+              global_app_state = DECIDE_QUESTION;
+              return;
+            }
+
+            if ( ( M5Cardputer.Keyboard.isKeyPressed('D') )
+              || ( M5Cardputer.Keyboard.isKeyPressed('d') ) )
+            {
+              quiz_type = 1;
+              global_app_state = DECIDE_QUESTION;
+              return;
+            }
+
+            if ( ( M5Cardputer.Keyboard.isKeyPressed('R') ) 
+              || ( M5Cardputer.Keyboard.isKeyPressed('r') ) )
+            {
+              quiz_type = 2;
+              global_app_state = DECIDE_QUESTION;
+              return;
+            }
+          }
+        }
+      break;
+
+
+      case DECIDE_QUESTION:
+        if ( global_prev_state != global_app_state ) {
+          global_prev_state = global_app_state;
+
+          switch (quiz_type)
+          {
+            case 0:
+              global_app_state = PRESENT_MULTIPLICATION_QUESTION;
+            break;
+
+            case 1:
+              global_app_state = PRESENT_DIVISION_QUESTION;
+            break;
+
+            case 2:
+                if ( random(0, 2) ) {
+                  global_app_state = PRESENT_MULTIPLICATION_QUESTION;
+                }
+                else {
+                  global_app_state = PRESENT_DIVISION_QUESTION;
+                }
+            break;
+          }
+        }
+
+      break;
+
+      case PRESENT_MULTIPLICATION_QUESTION:
         if ( global_prev_state != global_app_state ) {
           global_prev_state = global_app_state;
 
@@ -199,6 +299,46 @@ void loop() {
 
       break;
 
+      case PRESENT_DIVISION_QUESTION:
+        if ( global_prev_state != global_app_state ) {
+          global_prev_state = global_app_state;
+
+          round_count = round_count + 1;
+
+          a = random(1, 13);
+          c = random(1, 13);
+          b = c * a;
+          goal = c;
+
+          question = b;
+          question += " / ";
+          question += a;
+          question += " = ";
+  
+          clear_screen();
+
+          String top_message = "Question ";
+          top_message += round_count;
+          top_message += " out of ";
+          top_message += round_length;
+
+          small_top_message(top_message);
+
+          M5Cardputer.Display.setTextFont(&fonts::FreeSans18pt7b);
+          M5Cardputer.Display.setTextSize(1);
+
+          M5Cardputer.Display.setTextDatum(middle_left);
+          M5Cardputer.Display.drawString(question,
+                                        24,
+                                        M5Cardputer.Display.height() / 2 );
+
+          answer = "";
+          global_app_state = INPUT_ANSWER;
+          return;
+        }
+      break;
+
+
       case INPUT_ANSWER:
         if ( global_prev_state != global_app_state ) {
           global_prev_state = global_app_state;
@@ -219,7 +359,6 @@ void loop() {
             }
 
             if (status.enter) {
-
               global_app_state = CHECK_ANSWER;
               return;
             }
@@ -269,7 +408,7 @@ void loop() {
               global_app_state = TALLY_SCREEN;
             }
             else {
-              global_app_state = PRESENT_QUESTION;
+              global_app_state = DECIDE_QUESTION;
             }
 
             return;
@@ -282,7 +421,6 @@ void loop() {
           global_prev_state = global_app_state;
         
           clear_screen();
-
 
           M5Cardputer.Display.setTextDatum(middle_center);
           M5Cardputer.Display.setTextFont(&fonts::FreeSans18pt7b);
@@ -324,7 +462,6 @@ void loop() {
           }
         }
       break;
-
 
       case CELEBRATE_STATE:
         if ( global_prev_state != global_app_state ) {
