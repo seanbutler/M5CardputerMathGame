@@ -6,6 +6,12 @@ A maths game written for the new [M5 Cardputer](https://docs.m5stack.com/en/core
 ![](./images/IMG_0258-r270-1024x1024.jpg)
 ![](./images/IMG_0257-r270-1024x1024.jpg)
 
+
+- Version 0.3
+    - Refactored to better State Machine Code
+    - Refactored to GUI Widgets
+    - Added Some Colour 
+
 - Version 0.2
     - Renamed to Awesome Maths Game
     - Added Menu to select question type, Mult, Div or Random.
