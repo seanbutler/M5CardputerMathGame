@@ -55,13 +55,16 @@
 #include "glib.hpp"
 #include "lgfx/v1/lgfx_fonts.hpp"
 
+
+#include <random>
+
 // ============================================================
 
 namespace quiz {
 
-  constexpr unsigned int size = 3;
+  constexpr unsigned int size = 10;
 
-  char op;
+  String op;
   int first[size];  
   int second[size];  
   int answer[size];
@@ -74,13 +77,35 @@ namespace quiz {
     return answer[current] == guess;
   }
   
-  void generate_mul_questions()
+  void generate_mul_l1_questions()
   {
     correct = 0;
     current = 0;
 
+    std::vector<int> nums {2, 3, 4, 5, 8, 10};
+    std::random_device rd;
+    std::mt19937 gen (rd());
+    std::uniform_int_distribution<> dis(0, nums.size() -1);
+
     for (int n=0;n<size; n++){
-      first[n] = random(1, 11);
+      first[n] = nums[dis(gen)];
+      second[n] = random(1, 11);
+      answer[n] = first[n] * second[n];
+    }
+  }
+
+  void generate_mul_l2_questions()
+  {
+    correct = 0;
+    current = 0;
+
+    std::vector<int> nums {6, 7, 9, 11, 12, 25};
+    std::random_device rd;
+    std::mt19937 gen (rd());
+    std::uniform_int_distribution<> dis(0, nums.size() -1);
+
+    for (int n=0;n<size; n++){
+      first[n] = nums[dis(gen)];
       second[n] = random(1, 11);
       answer[n] = first[n] * second[n];
     }
@@ -98,6 +123,34 @@ namespace quiz {
     }
   }
 
+  void generate_round_questions()
+  {
+    correct = 0;
+    current = 0;
+
+    for (int n=0;n<size; n++){
+
+      int power = random(1, 4);
+
+      if ( power == 1) {
+        first[n] = random(1, 101);
+        second[n] = 10;
+        answer[n] = round( (float) ( first[n] / 10.0f ) ) * 10;
+      }
+      else if ( power == 2 )
+      {
+        first[n] = random(201, 1001);
+        second[n] = 100;
+        answer[n] = round( (float) ( first[n] / 100.0f ) ) * 100;
+      }
+      else
+      {
+        first[n] = random(201, 1001);
+        second[n] = 10;
+        answer[n] = round( (float) ( first[n] / 100.0f ) ) * 10;
+      }
+    }
+  }
 }
 
 
@@ -199,6 +252,7 @@ namespace app {
         sb::Label title_label;
         sb::Label choice1_label;
         sb::Label choice2_label;
+        sb::Label choice3_label;
         sb::Label instruction_label;
 
         menu_screen() {
@@ -218,19 +272,25 @@ namespace app {
           title_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, 4));
 
           choice1_label.SetColour(RED);
-          choice1_label.SetText(String("M) Multiplication"));
-          choice1_label.SetFont(fonts::FreeSans12pt7b);
+          choice1_label.SetText(String("1) Easy 2) Hard Multiply"));
+          choice1_label.SetFont(fonts::FreeSans9pt7b);
           choice1_label.SetAlignment(middle_center);
-          choice1_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, (M5Cardputer.Display.height()/2)-16));
+          choice1_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, (M5Cardputer.Display.height()/2)-24));
 
           choice2_label.SetColour(RED);
-          choice2_label.SetText(String("D) Division"));
-          choice2_label.SetFont(fonts::FreeSans12pt7b);
+          choice2_label.SetText(String("D) Divide"));
+          choice2_label.SetFont(fonts::FreeSans9pt7b);
           choice2_label.SetAlignment(middle_center);
-          choice2_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, (M5Cardputer.Display.height()/2)+16));
+          choice2_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, (M5Cardputer.Display.height()/2)+0));
+
+          choice3_label.SetColour(RED);
+          choice3_label.SetText(String("R) Round"));
+          choice2_label.SetFont(fonts::FreeSans9pt7b);
+          choice3_label.SetAlignment(middle_center);
+          choice3_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, (M5Cardputer.Display.height()/2)+24));
 
           instruction_label.SetColour(YELLOW);
-          instruction_label.SetText(String("Press M or D"));
+          instruction_label.SetText(String("Press 1, 2, D, or R"));
           instruction_label.SetFont(fonts::FreeSans9pt7b);
           instruction_label.SetAlignment(bottom_center);
           instruction_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, M5Cardputer.Display.height()-4));
@@ -238,6 +298,7 @@ namespace app {
           title_label.Render();
           choice1_label.Render();
           choice2_label.Render();
+          choice3_label.Render();
           instruction_label.Render();
         }
 
@@ -276,11 +337,11 @@ namespace app {
           title_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, 8));
           title_label.Render();
 
-          question_label.SetText(String(quiz::first[quiz::current]) + String(quiz::op) + String(quiz::second[quiz::current]) + String(" = "));
+          question_label.SetText(String(quiz::first[quiz::current]) + String(quiz::op) + String(quiz::second[quiz::current]) + String("="));
           question_label.SetColour(RED);
           question_label.SetFont(fonts::FreeSans18pt7b);
-          question_label.SetAlignment(middle_left);
-          question_label.SetPosition(sb::Position(24, M5Cardputer.Display.height()/2));
+          question_label.SetAlignment(middle_right);
+          question_label.SetPosition(sb::Position(M5Cardputer.Display.width()-64, M5Cardputer.Display.height()/2));
           question_label.Render();
 
           answer = "";
@@ -418,21 +479,38 @@ namespace app {
       if ( M5Cardputer.Keyboard.isChange()) {
         if ( M5Cardputer.Keyboard.isPressed()) {
           
-          if ( ( M5Cardputer.Keyboard.isKeyPressed('M') )
-            || ( M5Cardputer.Keyboard.isKeyPressed('m') ) )
+          if ( M5Cardputer.Keyboard.isKeyPressed('1') )
           {
-            quiz::op = 'x';
-            quiz::generate_mul_questions();
+            quiz::op = "x";
+            quiz::generate_mul_l1_questions();
             machine->ChangeState(&question_screen_state);
           }
+
+          if ( M5Cardputer.Keyboard.isKeyPressed('2') )
+          {
+            quiz::op = "x";
+            quiz::generate_mul_l2_questions();
+            machine->ChangeState(&question_screen_state);
+          }
+
 
           if ( ( M5Cardputer.Keyboard.isKeyPressed('D') )
             || ( M5Cardputer.Keyboard.isKeyPressed('d') ) )
           {
-            quiz::op = '/';
+            quiz::op = "/";
             quiz::generate_div_questions();
             machine->ChangeState(&question_screen_state);
           }            
+
+          if ( ( M5Cardputer.Keyboard.isKeyPressed('R') )
+            || ( M5Cardputer.Keyboard.isKeyPressed('r') ) )
+          {
+            quiz::op = "R";
+            quiz::generate_round_questions();
+            machine->ChangeState(&question_screen_state);
+          }            
+
+
         }
       }
     }
@@ -460,13 +538,13 @@ namespace app {
             machine->ChangeState(&check_answer_screen_state);
           }
 
-          M5Cardputer.Display.fillRect( M5Cardputer.Display.width() - 82,  (M5Cardputer.Display.height()/2 ) - 16, 
-                                        80,  32, 
+          M5Cardputer.Display.fillRect( M5Cardputer.Display.width() - 64,  (M5Cardputer.Display.height()/2 ) - 16, 
+                                        64,  32, 
                                         BLACK);
 
           M5Cardputer.Display.setTextDatum(middle_right);
           M5Cardputer.Display.drawString(answer,
-                                M5Cardputer.Display.width() - 24,
+                                M5Cardputer.Display.width() - 8,
                                 M5Cardputer.Display.height() / 2 );
 
         }

@@ -7,6 +7,10 @@ A maths game written for the new [M5 Cardputer](https://docs.m5stack.com/en/core
 ![](./images/IMG_0257-r270-1024x1024.jpg)
 
 
+- Version 0.4
+    - Two Levels of Multiplication Difficulty
+    - Rounding to 10 or 100 
+
 - Version 0.3
     - Refactored to better State Machine Code
     - Refactored to GUI Widgets
