@@ -123,6 +123,18 @@ namespace quiz {
     }
   }
 
+  void generate_neg_questions()
+  {
+    correct = 0;
+    current = 0;
+
+    for (int n=0;n<size; n++){
+      first[n] = random(11, 101);
+      second[n] = random(1, 11);
+      answer[n] = first[n] - second[n];
+    }
+  }
+
   void generate_round_questions()
   {
     correct = 0;
@@ -147,7 +159,7 @@ namespace quiz {
       {
         first[n] = random(201, 1001);
         second[n] = 10;
-        answer[n] = round( (float) ( first[n] / 100.0f ) ) * 10;
+        answer[n] = round( (float) ( first[n] / 10.0f ) ) * 10;
       }
     }
   }
@@ -250,9 +262,7 @@ namespace app {
     class menu_screen : public fsm::state {
       public:
         sb::Label title_label;
-        sb::Label choice1_label;
-        sb::Label choice2_label;
-        sb::Label choice3_label;
+        std::array<sb::Label, 3> choice_labels;
         sb::Label instruction_label;
 
         menu_screen() {
@@ -271,34 +281,34 @@ namespace app {
           title_label.SetAlignment(top_center);
           title_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, 4));
 
-          choice1_label.SetColour(RED);
-          choice1_label.SetText(String("1) Easy 2) Hard Multiply"));
-          choice1_label.SetFont(fonts::FreeSans9pt7b);
-          choice1_label.SetAlignment(middle_center);
-          choice1_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, (M5Cardputer.Display.height()/2)-24));
+          choice_labels[0].SetColour(RED);
+          choice_labels[0].SetText(String("1) Easy 2) Hard Multiply"));
+          choice_labels[0].SetFont(fonts::FreeSans9pt7b);
+          choice_labels[0].SetAlignment(middle_center);
+          choice_labels[0].SetPosition(sb::Position(M5Cardputer.Display.width()/2, (M5Cardputer.Display.height()/2)-24));
 
-          choice2_label.SetColour(RED);
-          choice2_label.SetText(String("D) Divide"));
-          choice2_label.SetFont(fonts::FreeSans9pt7b);
-          choice2_label.SetAlignment(middle_center);
-          choice2_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, (M5Cardputer.Display.height()/2)+0));
+          choice_labels[1].SetColour(RED);
+          choice_labels[1].SetText(String("D) Divide R) Round"));
+          choice_labels[1].SetFont(fonts::FreeSans9pt7b);
+          choice_labels[1].SetAlignment(middle_center);
+          choice_labels[1].SetPosition(sb::Position(M5Cardputer.Display.width()/2, (M5Cardputer.Display.height()/2)+0));
 
-          choice3_label.SetColour(RED);
-          choice3_label.SetText(String("R) Round"));
-          choice2_label.SetFont(fonts::FreeSans9pt7b);
-          choice3_label.SetAlignment(middle_center);
-          choice3_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, (M5Cardputer.Display.height()/2)+24));
+          choice_labels[2].SetColour(RED);
+          choice_labels[2].SetText(String("S) Subtraction"));
+          choice_labels[2].SetFont(fonts::FreeSans9pt7b);
+          choice_labels[2].SetAlignment(middle_center);
+          choice_labels[2].SetPosition(sb::Position(M5Cardputer.Display.width()/2, (M5Cardputer.Display.height()/2)+24));
 
           instruction_label.SetColour(YELLOW);
-          instruction_label.SetText(String("Press 1, 2, D, or R"));
+          instruction_label.SetText(String("Press 1, 2, D, R or S"));
           instruction_label.SetFont(fonts::FreeSans9pt7b);
           instruction_label.SetAlignment(bottom_center);
           instruction_label.SetPosition(sb::Position(M5Cardputer.Display.width()/2, M5Cardputer.Display.height()-4));
 
           title_label.Render();
-          choice1_label.Render();
-          choice2_label.Render();
-          choice3_label.Render();
+          for(auto L : choice_labels ) {
+            L.Render();
+          }
           instruction_label.Render();
         }
 
@@ -493,7 +503,6 @@ namespace app {
             machine->ChangeState(&question_screen_state);
           }
 
-
           if ( ( M5Cardputer.Keyboard.isKeyPressed('D') )
             || ( M5Cardputer.Keyboard.isKeyPressed('d') ) )
           {
@@ -510,7 +519,13 @@ namespace app {
             machine->ChangeState(&question_screen_state);
           }            
 
-
+          if ( ( M5Cardputer.Keyboard.isKeyPressed('S') )
+            || ( M5Cardputer.Keyboard.isKeyPressed('s') ) )
+          {
+            quiz::op = "-";
+            quiz::generate_neg_questions();
+            machine->ChangeState(&question_screen_state);
+          }
         }
       }
     }

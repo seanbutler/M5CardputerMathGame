@@ -1,11 +1,17 @@
 # M5 Cardputer Math Game
 
-A maths game written for the new [M5 Cardputer](https://docs.m5stack.com/en/core/Cardputer). Suitable for a primary/middle schooler.
+A maths game written for the new [M5 Cardputer](https://docs.m5stack.com/en/core/Cardputer). Suitable for a primary/middle schooler. 
+
+Loosely based on the kind of maths outlined in the uk [key stage 1 & 2](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/335158/PRIMARY_national_curriculum_-_Mathematics_220714.pdf) curriculum
+
 
 ![](./images/IMG_0259-r270-1024x1024.jpg)
 ![](./images/IMG_0258-r270-1024x1024.jpg)
 ![](./images/IMG_0257-r270-1024x1024.jpg)
 
+- Version 0.5.1
+    - Simple Subtraction 11 to 100 Subtract 1 to 10
+    - Fixed Minor Arithmetic Bug
 
 - Version 0.4
     - Two Levels of Multiplication Difficulty
